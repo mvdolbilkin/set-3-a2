@@ -5,9 +5,6 @@
 #include <chrono>
 #include <numeric>
 
-// --- АЛГОРИТМЫ СОРТИРОВКИ ---
-
-// Сортировка вставками (Insertion Sort)
 void insertionSort(std::vector<int>& arr, int left, int right) {
     for (int i = left + 1; i <= right; i++) {
         int key = arr[i];
@@ -20,7 +17,6 @@ void insertionSort(std::vector<int>& arr, int left, int right) {
     }
 }
 
-// Функция слияния для Merge Sort
 void merge(std::vector<int>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -49,7 +45,6 @@ void merge(std::vector<int>& arr, int left, int mid, int right) {
     }
 }
 
-// Стандартный рекурсивный Merge Sort
 void standardMergeSort(std::vector<int>& arr, int left, int right) {
     if (left >= right) {
         return;
@@ -60,7 +55,6 @@ void standardMergeSort(std::vector<int>& arr, int left, int right) {
     merge(arr, left, mid, right);
 }
 
-// Гибридный Merge Sort
 void hybridMergeSort(std::vector<int>& arr, int left, int right, int threshold) {
     if (left >= right) {
         return;
@@ -76,11 +70,9 @@ void hybridMergeSort(std::vector<int>& arr, int left, int right, int threshold) 
 }
 
 
-// --- ЭТАП 1: ПОДГОТОВКА ТЕСТОВЫХ ДАННЫХ ---
 
 class ArrayGenerator {
 public:
-    // Генерирует массив со случайными значениями от minVal до maxVal
     static std::vector<int> generateRandomArray(int size, int minVal, int maxVal) {
         std::vector<int> arr(size);
         std::random_device rd;
@@ -92,7 +84,6 @@ public:
         return arr;
     }
 
-    // Генерирует массив, отсортированный в обратном порядке
     static std::vector<int> generateReversedArray(int size) {
         std::vector<int> arr(size);
         std::iota(arr.begin(), arr.end(), 1);
@@ -100,7 +91,6 @@ public:
         return arr;
     }
 
-    // Генерирует "почти" отсортированный массив
     static std::vector<int> generateAlmostSortedArray(int size, int swaps) {
         std::vector<int> arr(size);
         std::iota(arr.begin(), arr.end(), 1);
@@ -115,11 +105,9 @@ public:
 };
 
 
-// --- ЭТАП 2 и 3: ЭМПИРИЧЕСКИЙ АНАЛИЗ ---
 
 class SortTester {
 private:
-    // Запускает сортировку и замеряет время
     template<typename Func>
     static long long timeSort(Func sortFunc, std::vector<int>& arr) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -129,7 +117,6 @@ private:
     }
 
 public:
-    // Тестирует стандартный Merge Sort
     static double testStandardMergeSort(const std::vector<int>& sourceArr, int runs) {
         long long total_time = 0;
         for (int i = 0; i < runs; ++i) {
@@ -139,7 +126,6 @@ public:
         return static_cast<double>(total_time) / runs;
     }
 
-    // Тестирует гибридный Merge Sort
     static double testHybridMergeSort(const std::vector<int>& sourceArr, int runs, int threshold) {
         long long total_time = 0;
         for (int i = 0; i < runs; ++i) {
@@ -153,30 +139,22 @@ public:
 
 int main() {
     const int MAX_SIZE = 100000;
-    const int RUNS_PER_TEST = 5; // Количество замеров для усреднения
+    const int RUNS_PER_TEST = 5;
 
-    // Генерируем "большие" массивы
     auto masterRandom = ArrayGenerator::generateRandomArray(MAX_SIZE, 0, 6000);
     auto masterReversed = ArrayGenerator::generateReversedArray(MAX_SIZE);
-    // Для почти отсортированного, сделаем 1% обменов от максимального размера
     auto masterAlmostSorted = ArrayGenerator::generateAlmostSortedArray(MAX_SIZE, MAX_SIZE / 100);
 
-    // Пороги для гибридного алгоритма
     std::vector<int> thresholds = {5, 10, 20, 30, 50, 100};
 
-    // Выводим заголовок для CSV
     std::cout << "DataType,SortType,ArraySize,Threshold,Time_us" << std::endl;
 
-    for (int size = 500; size <= 30000; size += 500) { // Ограничим 30000 для скорости, можно поставить MAX_SIZE
+    for (int size = 500; size <= 30000; size += 500) { 
         
-        // --- Тестовые данные для текущего размера ---
         std::vector<int> randomArr(masterRandom.begin(), masterRandom.begin() + size);
         std::vector<int> reversedArr(masterReversed.begin(), masterReversed.begin() + size);
         std::vector<int> almostSortedArr(masterAlmostSorted.begin(), masterAlmostSorted.begin() + size);
 
-        // --- Тестирование ---
-
-        // Random
         double time_standard_random = SortTester::testStandardMergeSort(randomArr, RUNS_PER_TEST);
         std::cout << "Random,Standard," << size << ",0," << time_standard_random << std::endl;
         for (int th : thresholds) {
@@ -184,7 +162,6 @@ int main() {
             std::cout << "Random,Hybrid," << size << "," << th << "," << time_hybrid_random << std::endl;
         }
 
-        // Reversed
         double time_standard_reversed = SortTester::testStandardMergeSort(reversedArr, RUNS_PER_TEST);
         std::cout << "Reversed,Standard," << size << ",0," << time_standard_reversed << std::endl;
         for (int th : thresholds) {
@@ -192,7 +169,6 @@ int main() {
             std::cout << "Reversed,Hybrid," << size << "," << th << "," << time_hybrid_reversed << std::endl;
         }
 
-        // Almost Sorted
         double time_standard_almost = SortTester::testStandardMergeSort(almostSortedArr, RUNS_PER_TEST);
         std::cout << "AlmostSorted,Standard," << size << ",0," << time_standard_almost << std::endl;
         for (int th : thresholds) {
